@@ -5,6 +5,8 @@ import (
 	"errors"
 	"io"
 	"math"
+
+	"github.com/name5566/leaf/log"
 )
 
 // --------------
@@ -65,9 +67,11 @@ func (p *MsgParser) SetByteOrder(littleEndian bool) {
 func (p *MsgParser) Read(conn *TCPConn) ([]byte, error) {
 	var b [4]byte
 	bufMsgLen := b[:p.lenMsgLen]
+	log.Release("tcp_msg.go - Read : len = %v", p.lenMsgLen)
 
-	// read len
-	if _, err := io.ReadFull(conn, bufMsgLen); err != nil {
+	_, err := io.ReadFull(conn, bufMsgLen)
+
+	if err != nil {
 		return nil, err
 	}
 
@@ -89,20 +93,20 @@ func (p *MsgParser) Read(conn *TCPConn) ([]byte, error) {
 			msgLen = binary.BigEndian.Uint32(bufMsgLen)
 		}
 	}
-
 	// check len
 	if msgLen > p.maxMsgLen {
 		return nil, errors.New("message too long")
 	} else if msgLen < p.minMsgLen {
 		return nil, errors.New("message too short")
 	}
-
 	// data
 	msgData := make([]byte, msgLen)
-	if _, err := io.ReadFull(conn, msgData); err != nil {
+
+	_, err = io.ReadFull(conn, msgData)
+	if err != nil {
+		log.Release("tcp_msg.go - read data error")
 		return nil, err
 	}
-
 	return msgData, nil
 }
 

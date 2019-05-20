@@ -1,10 +1,11 @@
 package network
 
 import (
-	"github.com/name5566/leaf/log"
 	"net"
 	"sync"
 	"time"
+
+	"github.com/name5566/leaf/log"
 )
 
 type TCPServer struct {
@@ -33,6 +34,7 @@ func (server *TCPServer) Start() {
 
 func (server *TCPServer) init() {
 	ln, err := net.Listen("tcp", server.Addr)
+	log.Release("tcp_server.go -- init - %v - %v", server.Addr, server.LenMsgLen)
 	if err != nil {
 		log.Fatal("%v", err)
 	}
@@ -60,6 +62,8 @@ func (server *TCPServer) init() {
 }
 
 func (server *TCPServer) run() {
+	log.Release("tcp_server.go -- run")
+
 	server.wgLn.Add(1)
 	defer server.wgLn.Done()
 

@@ -1,9 +1,10 @@
 package network
 
 import (
-	"github.com/name5566/leaf/log"
 	"net"
 	"sync"
+
+	"github.com/name5566/leaf/log"
 )
 
 type ConnSet map[net.Conn]struct{}
@@ -17,6 +18,7 @@ type TCPConn struct {
 }
 
 func newTCPConn(conn net.Conn, pendingWriteNum int, msgParser *MsgParser) *TCPConn {
+	log.Release("tcp_conn.go -- newTCPConn")
 	tcpConn := new(TCPConn)
 	tcpConn.conn = conn
 	tcpConn.writeChan = make(chan []byte, pendingWriteNum)

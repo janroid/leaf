@@ -1,10 +1,11 @@
 package network
 
 import (
-	"github.com/name5566/leaf/log"
 	"net"
 	"sync"
 	"time"
+
+	"github.com/name5566/leaf/log"
 )
 
 type TCPClient struct {
@@ -73,6 +74,7 @@ func (client *TCPClient) dial() net.Conn {
 	for {
 		conn, err := net.Dial("tcp", client.Addr)
 		if err == nil || client.closeFlag {
+			log.Release("connect to %v", client.Addr)
 			return conn
 		}
 
@@ -84,7 +86,7 @@ func (client *TCPClient) dial() net.Conn {
 
 func (client *TCPClient) connect() {
 	defer client.wg.Done()
-
+	log.Release("tcp_client.go -- connect")
 reconnect:
 	conn := client.dial()
 	if conn == nil {
