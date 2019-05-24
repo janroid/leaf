@@ -4,11 +4,12 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"math"
+	"reflect"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/name5566/leaf/chanrpc"
 	"github.com/name5566/leaf/log"
-	"math"
-	"reflect"
 )
 
 // -------------------------
@@ -63,6 +64,7 @@ func (p *Processor) Register(msg proto.Message) uint16 {
 	i.msgType = msgType
 	p.msgInfo = append(p.msgInfo, i)
 	id := uint16(len(p.msgInfo) - 1)
+
 	p.msgID[msgType] = id
 	return id
 }
@@ -141,16 +143,22 @@ func (p *Processor) Unmarshal(data []byte) (interface{}, error) {
 	} else {
 		id = binary.BigEndian.Uint16(data)
 	}
+
+	log.Release("protobuf - unmarshal: id = %v, data = %v", id, data)
+
 	if id >= uint16(len(p.msgInfo)) {
 		return nil, fmt.Errorf("message id %v not registered", id)
 	}
 
 	// msg
 	i := p.msgInfo[id]
+
 	if i.msgRawHandler != nil {
+		log.Debug("protobuf - unmarshal: 1")
 		return MsgRaw{id, data[2:]}, nil
 	} else {
 		msg := reflect.New(i.msgType.Elem()).Interface()
+		log.Debug("protobuf - unmarshal: msg = %v", msg)
 		return msg, proto.UnmarshalMerge(data[2:], msg.(proto.Message))
 	}
 }
@@ -179,8 +187,10 @@ func (p *Processor) Marshal(msg interface{}) ([][]byte, error) {
 }
 
 // goroutine safe
-func (p *Processor) Range(f func(id uint16, t reflect.Type)) {
+func (p *Processor) Range(f func(id int, t reflect.Type)) {
 	for id, i := range p.msgInfo {
-		f(uint16(id), i.msgType)
+		f(int(id), i.msgType)
 	}
+
+	f(-1, nil)
 }

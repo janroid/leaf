@@ -67,11 +67,12 @@ func (p *MsgParser) SetByteOrder(littleEndian bool) {
 func (p *MsgParser) Read(conn *TCPConn) ([]byte, error) {
 	var b [4]byte
 	bufMsgLen := b[:p.lenMsgLen]
-	log.Release("tcp_msg.go - Read : len = %v", p.lenMsgLen)
+	log.Release("tcp_msg.go - Read : p.lenMsgLen = %v", p.lenMsgLen)
 
 	_, err := io.ReadFull(conn, bufMsgLen)
 
 	if err != nil {
+		log.Release("tcp_msg.go - Read msgLen error : %v", err)
 		return nil, err
 	}
 
@@ -93,13 +94,15 @@ func (p *MsgParser) Read(conn *TCPConn) ([]byte, error) {
 			msgLen = binary.BigEndian.Uint32(bufMsgLen)
 		}
 	}
+
+	log.Release("tcp_msg.go - Read msgLen  : msgLen = %v", msgLen)
 	// check len
 	if msgLen > p.maxMsgLen {
 		return nil, errors.New("message too long")
 	} else if msgLen < p.minMsgLen {
 		return nil, errors.New("message too short")
 	}
-	// data
+	// ID + Data
 	msgData := make([]byte, msgLen)
 
 	_, err = io.ReadFull(conn, msgData)
@@ -107,6 +110,8 @@ func (p *MsgParser) Read(conn *TCPConn) ([]byte, error) {
 		log.Release("tcp_msg.go - read data error")
 		return nil, err
 	}
+
+	log.Release("tcp_msg.go - Read Data: data = %v", msgData)
 	return msgData, nil
 }
 
