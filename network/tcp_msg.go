@@ -70,7 +70,7 @@ func (p *MsgParser) Read(conn *TCPConn) ([]byte, error) {
 	log.Release("tcp_msg.go - Read : p.lenMsgLen = %v", p.lenMsgLen)
 
 	_, err := io.ReadFull(conn, bufMsgLen)
-
+	log.Release("tcp_msg.go - Read : p.bufMsgLen = %v", bufMsgLen)
 	if err != nil {
 		log.Release("tcp_msg.go - Read msgLen error : %v", err)
 		return nil, err
@@ -149,7 +149,7 @@ func (p *MsgParser) Write(conn *TCPConn, args ...[]byte) error {
 			binary.BigEndian.PutUint32(msg, msgLen)
 		}
 	}
-
+	log.Debug("tcp_msg.Write -- msgLen = %v", msgLen)
 	// write data
 	l := p.lenMsgLen
 	for i := 0; i < len(args); i++ {

@@ -90,7 +90,7 @@ func (tcpConn *TCPConn) Write(b []byte) {
 	if tcpConn.closeFlag || b == nil {
 		return
 	}
-
+	log.Debug("TcpConn.Write - b = %v", b)
 	tcpConn.doWrite(b)
 }
 
